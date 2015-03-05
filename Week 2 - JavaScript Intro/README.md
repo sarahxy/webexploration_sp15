@@ -55,6 +55,7 @@ myObj['js'];            // true
 
 var cat = 'dog';
 myObj[cat];             // 1
+Object.keys(myObj)      // (returns your object)
 ```
 
 #### Arrays
@@ -84,9 +85,9 @@ function hello(world) {
 
 hello.bye = 'sadness';
 
-typeof hello;           // You tell me
-typeof hello();         // Guesses?
-typeof hello.bye;       // hi?
+typeof hello;           // 'function'
+typeof hello();         // 'undefined'
+typeof hello.bye;       // ???
 ```
 
 
@@ -99,10 +100,11 @@ var b = Number(a);
 
 a;                      // '42'
 b;                      // 42
+a == b;                 // 'true' (will convert until it finds a statement where it's true otherwise false)
 
 // Implicit
 var c = a * 1;
-a;                      // what do you think?
+a;                      // what do you think? (will actually calculate the number)
 b;                      // ???
 ```
 
@@ -121,7 +123,7 @@ var a = "42";
 var b = 42;
 
 a == b;
-a === b;
+a === b;                // 'false' (NOTE: use this more! enforces type)
 ```
 
 What's the difference?
@@ -131,12 +133,14 @@ var a = [1,2,3];
 var b = [1,2,3];
 var c = "1,2,3";
 
-a == b;                 // Gut instinct?
-a == c;
+a == b;                 // 'false' (array pointers are different)
+a == c;                 // 'true' (because values are the same and string is an array of characters)
 ```
 
 ### Scope
 #### Lifetime of a variable
+
+NOTE: Javascript is an event-based language; executed based on events not on explicit calls, but events use calls
 
 Maps a name to a value in a given environment
 
@@ -146,7 +150,7 @@ function add(x, y) {
     if (true) {
         var sum = 42;
     }
-    return sum;
+    return sum;         // returns '42'
 };
 ```
 
@@ -185,11 +189,23 @@ that functions scope, your private scope. Because the only way to create
 private scope is to be inside a function, you sometimes have to
 create functions on the fly. One way is to use self-invocation.
 
-```javascript
+```javascript           // gives you a private scope when you use this syntax (kills it after it finishes running; protecting a variable; doing a calculation)
+                        // people use this to save memory space when declaring random variables --> garbage collection ;)
 (function() {
     // Stuff in here is ran the moment it's encountered
     // On demand private scope
 })();
+```
+
+```javascript (example) // redefining variables and private scopes
+var a = 'dog';
+
+function cat(b) {
+    var a = b;
+    return a;          // will return 'b'
+}
+
+return a;              // will return 'dog'
 ```
 
 Pretty much, this function is executed immediately by the interpreter when
@@ -260,11 +276,11 @@ This is because we neglected the keyword var. Javascript then hoists the
 variable `b` up to the global scope: the window object if you're in a browser.
 
 My recommendation, please don't use global scope. It's just super confusing and
-bad practice. If you want to check if you write code that accidently writes to
+bad practice. If you want to check if you write code that accidentally writes to
 the global scope, you can use:
 
 ```javascript
-// For browsers only
+// For browsers only --> returns all of your keys to help you fix it!!
 Object.keys(window);
 ```
 
@@ -299,7 +315,7 @@ var person = {
 };
 ```
 
-2. Use `.call()` or `.bind()` which allows you to pass in `this`.
+2. Use `.call()` or `.bind()` which allows you to pass in (or set) `this`.
 ```javascript
 var person = {
     name: "Doe",
@@ -309,8 +325,18 @@ var person = {
         }
     }
 };
-person.logName.call({ name: "John" }, true);
+person.logName.call({ name: "John" }, true);       // this object is the "this" variable
 ```
+NOTE: call sets 'this' to whatever you pass in
+
+
+SYNTAX NOTE ON CALL:
+function.call({ object: stuff }, true, 'otherthing', 'cow');     // "object: stuff" is your "this" object
+
+function (boolean, string, string) {
+    return this.object;                                          // 'stuff'
+}
+
 
 ```javascript
 var person = {
@@ -341,6 +367,10 @@ boundName('Joe');
 // "Joe"
 ```
 
+SYNTAX NOTE ON BIND:
+everything set within an array --> very slow to execute (10-20 times slower than call or applys); 
+
+
 4. Use the `new` keyword
 ```javascript
 function person(name) {
@@ -355,13 +385,13 @@ var christian = new User("Christian");
 ```javascript
 // In a browser
 (function() {
-    console.log(this);
+    console.log(this);      // depends on call site
 })();
 ```
 
 ```javascript
 // Global object
-// In browser: window
+// In browser: window       // logs the window object
 ```
 
 ```javascript
@@ -372,7 +402,7 @@ var colors = ["green", "blue", "pink"];
 ```
 
 ```javascript
-// colors
+// colors                   // logs the colors object
 ```
 
 ```javascript
@@ -390,3 +420,30 @@ user.print();
 
 Now go code something in Javascript...
 
+
+
+
+===NOTE===
+             // THESE WILL NEVER RUN....
+
+var something = function() {};
+
+function something() {
+    
+};
+
+             //... UNLESS YOU CALL THEM
+
+something()
+
+(function() {
+    
+})();
+
+
+
+
+===NOTE: Javascript is asynchronous===
+$http.get('url', function(response) {
+    $http.get('', function);
+});
